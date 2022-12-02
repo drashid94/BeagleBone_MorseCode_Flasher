@@ -30,6 +30,11 @@ void delayInMs(int msDelay)
     }
 }
 
+static void flash_empty_dot_times(int n)
+{
+
+}
+
 void main(void)
 {
     // Initialize:
@@ -49,10 +54,15 @@ void main(void)
     int morseDataLen = pSharedMemStruct->morseCodeDataLength;
     while(i < morseDataLen)
     {
-        uint16_t morse_char = pSharedMemStruct->morseCodeData[i]; // One charactor in morse code
-        while(morse_char)
+        uint16_t morse_letter = pSharedMemStruct->morseCodeData[i]; // One charactor in morse code
+        //Check if whitespace letter
+        if(!morse_letter)
         {
-            if(morse_char & 0x8000)
+            flash_empty_dot_times(7);
+        }
+        while(morse_letter)
+        {
+            if(morse_letter & 0x8000)
             {
                 __R30 |= LED_MASK;
                 pSharedMemStruct->isLedOn = true;
@@ -62,10 +72,13 @@ void main(void)
                 __R30 &= ~LED_MASK;
                 pSharedMemStruct->isLedOn = false;
             }
+            pSharedMemStruct->isFlagDataReady = true;
             delayInMs(300);
-            morse_char <<= morse_char;
+            morse_letter <<= morse_letter;
+            pSharedMemStruct->isButtonPressed = (__R31 & BUTTON_MASK) != 0;
         }
-        pSharedMemStruct->isButtonPressed = (__R31 & BUTTON_MASK) != 0;
+        //End of letter
+        flash_empty_dot_times(3);
         i++;
     }
     //When done with morse data

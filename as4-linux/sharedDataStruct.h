@@ -14,6 +14,8 @@ typedef struct {
     //PRU Written Data
     bool isLedOn;
     bool isButtonPressed;
-    bool isflashingCompleted;
+    bool isFlashingCompleted;
+    bool isFlagDataReady;
+    uint8_t padding1. padding2, padding3;
 } sharedMemStruct_t;
 #endif

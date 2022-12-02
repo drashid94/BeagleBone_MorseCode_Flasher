@@ -21,6 +21,9 @@
 // Between characters, must have 3-dot times (total) of off (0's) (not encoded here)
 // Between words, must have 7-dot times (total) of off (0's) (not encoded here).
 //
+
+#include <stdio.h>
+
 static unsigned short morsecode_codes[] = {
 		0xB800,	// A 1011 1
 		0xEA80,	// B 1110 1010 1
@@ -63,6 +66,11 @@ unsigned short MorseCode_getFlashCode(char ch)
 	// If valid letter, look it up in the array:
 	if (ch >= 'A' && ch <= 'Z') {
 		flashCode = morsecode_codes[ch - 'A'];
+	}
+	if(ch == ' ')
+	{
+		printf("Whitespace detected\n");
+		return 0x0000;
 	}
 	return flashCode;
 }
