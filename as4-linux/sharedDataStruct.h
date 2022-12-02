@@ -7,10 +7,13 @@
 //Shared Data Struct
 typedef struct {
     // Linux Written Data
-    uint16_t data[100];
+    uint16_t morseCodeData[100];
+    uint32_t morseCodeDataLength;
+    bool isMorseDataReady;  
     
     //PRU Written Data
     bool isLedOn;
     bool isButtonPressed;
+    bool isflashingCompleted;
 } sharedMemStruct_t;
 #endif
