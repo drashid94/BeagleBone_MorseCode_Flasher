@@ -24,4 +24,7 @@ int main (int argc, char *argv[]){
         //write code to the array
         writeToDataArray(decode, i);
     }
+
+    free(buff);
+    buff = NULL;
 }
