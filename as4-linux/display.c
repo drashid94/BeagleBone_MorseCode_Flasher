@@ -108,6 +108,7 @@ void updateDisplay(bool newLine)
         updateBitmap(newLine);
         updateBitArray();
         printLine();
+        
 }
 
 /*init thread*/

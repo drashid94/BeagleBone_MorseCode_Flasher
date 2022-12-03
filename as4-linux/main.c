@@ -12,6 +12,22 @@
 // General PRU Memomry Sharing Routine
 // ----------------------------------------------------------------
 
+void printDecode(unsigned short code, bool isLast){
+    if (!code){
+        printf("_");
+    }
+    while (code){
+        if (code & 0x8000){
+            printf("X");
+        }else {
+            printf("_");
+        }
+        code <<= 1;   
+    }
+    if (!isLast){
+        printf("___");
+    }
+}
 
 void pru_init(void)
 {
@@ -33,18 +49,40 @@ int main (int argc, char *argv[]){
         printf("Please write some text\n");
         size_t numCh = getline(&buff, &sizeAllocated, stdin);
 
-        for (int i = 0; i < numCh - 1; i++){
-            unsigned short decode = MorseCode_getFlashCode(buff[i]);
+        for (int i = numCh - 1; i >= 0; i--){
+            if (buff[i] == ' ' || buff[i] == '\n' || buff[i] == '\t'){
+                numCh--;
+            }else{
+                break;
+            }
+        }
+        printf ("numch: %zu\n", numCh);
+
+
+        unsigned short decode;
+        bool isLast = false;
+        for (int i = 0; i < numCh; i++){
+            decode = MorseCode_getFlashCode(buff[i]);
             //check code
-            printf("code: %2x\n", decode);
+            //printf("code: %2x\n", decode);
+            if (i == numCh -1){
+                isLast = true;
+            }
+            printDecode(decode, isLast);
+            fflush(stdout);
             //write code to the array
             writeToDataArray(decode, i);
         }
+        printf("\n");
+        //decode -> short 2 byte
 
-        memMap_set_data_length(numCh - 1);
+
+
+
+        memMap_set_data_length(numCh);
         memMap_set_data_ready_flag();
 
-        printf("Flags: %d, %d, %d\n", isSentenceCompleted(), returnFlashingFlag(), returnLEDstatus());
+        //printf("Flags: %d, %d, %d\n", isSentenceCompleted(), returnFlashingFlag(), returnLEDstatus());
 
 
         while(!isSentenceCompleted()){
@@ -54,10 +92,22 @@ int main (int argc, char *argv[]){
             if(!isSentenceCompleted())
             {
                 setLedDataReadyFlagOFF();
+
+                if (returnLEDstatus()){
+                printf("X");
+                }else{
+                printf("_");
+                }
+                fflush(stdout);
+                
                 updateDisplay(returnLEDstatus());
-                printf("Updated display\n");
+                //printf("Updated display\n");
+
             }
+            
+
         }
+        printf("\n");
         displayWriter_cleanup();
         free(buff);
         buff = NULL;

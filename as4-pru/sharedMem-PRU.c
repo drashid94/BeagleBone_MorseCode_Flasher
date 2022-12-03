@@ -106,9 +106,11 @@ void main(void)
                 pSharedMemStruct->isButtonPressed = (__R31 & BUTTON_MASK) != 0;
             }
             //End of letter
-            flash_empty_dot_times(3);
-
             i++;
+
+            if (i != morseDataLen){
+                flash_empty_dot_times(3);
+            }
         }
         signal_blink();
         signal_blink();

@@ -50,26 +50,26 @@ void meminit(){
 
 
 void writeToDataArray(unsigned short code, int index) {
-    printf("Sharing memory with PRU\n");
-    printf("putting the code on the array");
+    //printf("Sharing memory with PRU\n");
+    //printf("putting the code on the array");
 
     pSharedPru0->morseCodeData[index] = code;
 
-    printf("input to array: %2x\n", pSharedPru0->morseCodeData[index]);
-    printf("index: %d\n", index);
+    //printf("input to array: %2x\n", pSharedPru0->morseCodeData[index]);
+    //printf("index: %d\n", index);
 
 }
 
 
 void memMap_set_data_ready_flag()
 {
-    printf("Setting morse data ready to true\n");
+    //printf("Setting morse data ready to true\n");
     pSharedPru0->isMorseDataReady = true;
 }
 
 void memMap_set_data_length(int len)
 {
-    printf("setting data length to %d\n", len);
+    //printf("setting data length to %d\n", len);
     
     pSharedPru0->morseCodeDataLength = len;
 
