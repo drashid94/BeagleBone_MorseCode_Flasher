@@ -16,7 +16,8 @@
 #define PRU0_MEM_FROM_BASE(base) ( (base) + PRU0_DRAM + PRU_MEM_RESERVED)
 #define PRU1_MEM_FROM_BASE(base) ( (base) + PRU1_DRAM + PRU_MEM_RESERVED)
 #define PRUSHARED_MEM_FROM_BASE(base) ( (base) + PRU_SHAREDMEM)
-
+volatile void *pPruBase;
+volatile sharedMemStruct_t *pSharedPru0;
 
 // Return the address of the PRU's base memory
 volatile void* getPruMmapAddr(void) {
@@ -26,7 +27,7 @@ volatile void* getPruMmapAddr(void) {
         exit(EXIT_FAILURE);
     }
 // Points to start of PRU memory.
-volatile void* pPruBase = mmap(0, PRU_LEN, PROT_READ | PROT_WRITE, MAP_SHARED, fd, PRU_ADDR);
+    pPruBase = mmap(0, PRU_LEN, PROT_READ | PROT_WRITE, MAP_SHARED, fd, PRU_ADDR);
     if (pPruBase == MAP_FAILED) {
         perror("ERROR: could not map memory");
         exit(EXIT_FAILURE);
@@ -35,66 +36,63 @@ volatile void* pPruBase = mmap(0, PRU_LEN, PROT_READ | PROT_WRITE, MAP_SHARED, f
     return pPruBase;
 }
 
-void freePruMmapAddr(volatile void* pPruBase){
+void freePruMmapAddr(){
     if (munmap((void*) pPruBase, PRU_LEN)) {
         perror("PRU munmap failed");
         exit(EXIT_FAILURE);
     }
 }
 
+void meminit(){
+    pPruBase = getPruMmapAddr();
+    pSharedPru0 = PRU0_MEM_FROM_BASE(pPruBase);
+}
+
+
 void writeToDataArray(unsigned short code, int index) {
     printf("Sharing memory with PRU\n");
     printf("putting the code on the array");
-
-// Get access to shared memory for my uses
-    volatile void *pPruBase = getPruMmapAddr();
-    volatile sharedMemStruct_t *pSharedPru0 = PRU0_MEM_FROM_BASE(pPruBase);
-
-    /*// Drive it
-    for (int i = 0; i < 20; i++) {
-        // Drive LED
-        pSharedPru0->isLedOn = (i % 2 == 0);
-        // Print button
-        printf("Button: %d\n",
-        pSharedPru0->isButtonPressed);
-        // Timing
-        sleep(1);
-    }*/
 
     pSharedPru0->morseCodeData[index] = code;
 
     printf("input to array: %2x\n", pSharedPru0->morseCodeData[index]);
     printf("index: %d\n", index);
 
-
-    // Cleanup
-    freePruMmapAddr(pPruBase);
 }
+
 
 void memMap_set_data_ready_flag()
 {
-    volatile void *pPruBase = getPruMmapAddr();
-    volatile sharedMemStruct_t *pSharedPru0 = PRU0_MEM_FROM_BASE(pPruBase);
-
     printf("Setting morse data ready to true\n");
     pSharedPru0->isMorseDataReady = true;
-
-    freePruMmapAddr(pPruBase);
 }
 
 void memMap_set_data_length(int len)
 {
-    volatile void *pPruBase = getPruMmapAddr();
-    volatile sharedMemStruct_t *pSharedPru0 = PRU0_MEM_FROM_BASE(pPruBase);
-
     printf("setting data length to %d\n", len);
     
     pSharedPru0->morseCodeDataLength = len;
 
-    freePruMmapAddr(pPruBase);
 }
 
 void memMap_cleanup(void)
 {
     freePruMmapAddr(getPruMmapAddr);
+}
+
+bool returnFlashingFlag(){
+    return pSharedPru0->isFlagDataReady;
+}
+
+bool returnLEDstatus(){
+    return pSharedPru0->isLedOn;
+}
+
+void setLEDFlagOFF(){
+    pSharedPru0 -> isLedOn = false;
+}
+
+bool isSentenceCompleted(){
+    //done with the sentence 
+    return pSharedPru0 -> isFlashingCompleted;
 }

@@ -12,6 +12,7 @@
 // General PRU Memomry Sharing Routine
 // ----------------------------------------------------------------
 
+
 void pru_init(void)
 {
     printf("Configuring pru pins\n");
@@ -22,37 +23,7 @@ void pru_init(void)
 int main (int argc, char *argv[]){
     printf("testing driver\n");
     displayWriter_init();
-
-    bool newline = true;
-    updateDisplay(newline);
-    sleep_for_ms(1000);
-
-    newline = false;
-    updateDisplay(newline);
-
-    sleep_for_ms(500);
-    newline = true;
-    updateDisplay(newline);
-
-    sleep_for_ms(500);
-    newline = true;
-    updateDisplay(newline);
-
-    sleep_for_ms(500);
-    newline = true;
-    updateDisplay(newline);
-
-    sleep_for_ms(500);
-    newline = false;
-    updateDisplay(newline);
-
-    sleep_for_ms(500);
-    newline = true;
-    updateDisplay(newline);
-
-
-
-
+    meminit();
     char *buff = NULL;
     size_t sizeAllocated = 0;
     size_t numCh = getline(&buff, &sizeAllocated, stdin);
@@ -65,12 +36,22 @@ int main (int argc, char *argv[]){
         //write code to the array
         writeToDataArray(decode, i);
     }
-    sleep_for_ms(5000);
-    displayWriter_cleanup();
 
     memMap_set_data_length(numCh - 1);
     memMap_set_data_ready_flag();
 
+    while (true){
+
+        while(!isSentenceCompleted()){
+            while (!returnFlashingFlag()){
+            //wait for the return flag
+            }
+        setLEDFlagOFF();
+        updateDisplay(returnLEDstatus());
+        }
+    }
+
+    displayWriter_cleanup();
     free(buff);
     buff = NULL;
 
