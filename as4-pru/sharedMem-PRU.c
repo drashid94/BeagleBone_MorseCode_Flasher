@@ -83,7 +83,7 @@ void main(void)
     }
     //When done with morse data
     pSharedMemStruct->isLedOn = false;
-    pSharedMemStruct->isflashingCompleted = true;
+    pSharedMemStruct->isFlashingCompleted = true;
  }
 
  //Linux::

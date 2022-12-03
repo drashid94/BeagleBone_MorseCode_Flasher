@@ -74,7 +74,3 @@ unsigned short MorseCode_getFlashCode(char ch)
 	}
 	return flashCode;
 }
-
-int main(void){
-	// DO nothing	
-}

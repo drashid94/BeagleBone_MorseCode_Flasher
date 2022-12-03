@@ -16,6 +16,6 @@ typedef struct {
     bool isButtonPressed;
     bool isFlashingCompleted;
     bool isFlagDataReady;
-    uint8_t padding1. padding2, padding3;
+    uint8_t padding1, padding2, padding3;
 } sharedMemStruct_t;
 #endif
