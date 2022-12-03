@@ -16,4 +16,5 @@ void setLedDataReadyFlagOFF();
 bool returnFlashingFlag();
 bool returnLEDstatus();
 bool isSentenceCompleted();
+void memMap_cleanup(void);
 #endif

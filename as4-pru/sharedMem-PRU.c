@@ -31,6 +31,14 @@ void delayInMs(int msDelay)
     }
 }
 
+void dotDelay()
+{
+    if(__R31 & (BUTTON_MASK))
+        delayInMs(1000);
+    if(!(__R31 & (BUTTON_MASK)))
+        delayInMs(300);
+}
+
 static void flash_empty_dot_times(int n)
 {
     for(int i = 0; i < n; i++)
@@ -38,22 +46,22 @@ static void flash_empty_dot_times(int n)
         __R30 &= ~(LED_MASK);
         pSharedMemStruct->isLedOn = false;
         pSharedMemStruct->isFlagDataReady = true;
-        delayInMs(300);
+        dotDelay();
     }
 }
 
 void signal_blink()
 {
     __R30 |= (LED_MASK);
-    delayInMs(100);
+    dotDelay();
     __R30 &= ~(LED_MASK);
-    delayInMs(50);
+    dotDelay();
     __R30 |= (LED_MASK);
-    delayInMs(50);
+    dotDelay();
     __R30 &= ~(LED_MASK);
-    delayInMs(50);
+    dotDelay();
     __R30 |= (LED_MASK);
-    delayInMs(50);
+    dotDelay();
     __R30 &= ~(LED_MASK);
 }
 
@@ -64,16 +72,11 @@ void main(void)
     {
         // Initialize:
         memset((void*)pSharedMemStruct, 0, sizeof(sharedMemStruct_t));
-
-        signal_blink();
-
+        
         while(!pSharedMemStruct->isMorseDataReady)
         {
             //wait for data to be ready
         }
-
-        signal_blink();
-        signal_blink();
 
         //Clear flag
         pSharedMemStruct->isMorseDataReady = false;
@@ -101,7 +104,8 @@ void main(void)
                     pSharedMemStruct->isLedOn = false;
                 }
                 pSharedMemStruct->isFlagDataReady = true;
-                delayInMs(300);
+
+                dotDelay();
                 morse_letter <<= 1;
                 pSharedMemStruct->isButtonPressed = (__R31 & BUTTON_MASK) != 0;
             }
@@ -112,8 +116,6 @@ void main(void)
                 flash_empty_dot_times(3);
             }
         }
-        signal_blink();
-        signal_blink();
 
         //When done with morse data
         pSharedMemStruct->isLedOn = false;
