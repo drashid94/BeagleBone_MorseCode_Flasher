@@ -2,7 +2,7 @@
 # by Brian Fraser
 # Edit this file to compile extra C files into their own programs.
 TARGET= as4-morsecode.out
-SOURCES= morsecode.c main.c memMap.c
+SOURCES= morsecode.c main.c memMap.c display.c util.c
 PUBDIR = $(HOME)/cmpt433/public/myApps
 OUTDIR = $(PUBDIR)
 CROSS_TOOL = arm-linux-gnueabihf-

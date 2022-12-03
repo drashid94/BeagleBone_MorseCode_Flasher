@@ -7,4 +7,6 @@
 void displayWriter_init(void);
 
 void displayWriter_cleanup(void);
+
+void updateDisplay(bool newLine);
 #endif

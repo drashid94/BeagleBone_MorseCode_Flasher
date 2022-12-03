@@ -7,6 +7,7 @@
 #include <linux/i2c.h>
 #include <linux/i2c-dev.h>
 #include "util.h"
+#include "stdbool.h"
 
 /*hardware specs defines*/
 #define DISPLAY_I2C_ADDR 0x70
@@ -24,25 +25,12 @@
 #define ROW7 0X0E
 
 static unsigned char rows[] = {ROW7, ROW6, ROW5, ROW4, ROW3, ROW2, ROW1, ROW0};
-static pthread_t displayThreadID;
-static int stopping = 0;
-
+//static unsigned char masked[] = {0x00, 0x00, 0x00, 0x00,0x00, 0x00, 0x00, 0x00};
+static unsigned char resultBits = 0x00;
+//bool newLine = false;
 static unsigned char dots[] = {0x80, 0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40};
-
-
-// << 4 to get the one on the right
-// the digit[0] and digit[1] will select the correct pattern from the table
-/*static unsigned char numberTable[10][8] = {{0x02, 0x05, 0x05, 0x05, 0x05, 0x05, 0x02, 0x00}, //0
-                                    {0x02, 0x06, 0x02, 0x02, 0x02, 0x02, 0x07, 0x00}, //1
-                                    {0x07, 0x01, 0x01, 0x07, 0x04, 0x04, 0x07, 0x00}, //2
-                                    {0x07, 0x01, 0x01, 0x03, 0x01, 0x01, 0x07, 0x00}, //3 
-                                    {0x05, 0x05, 0x05, 0x07, 0x01, 0x01, 0x01, 0x00}, //4 
-                                    {0x07, 0x04, 0x04, 0x07, 0x01, 0x05, 0x07, 0x00}, //5 
-                                    {0x07, 0x04, 0x04, 0x07, 0x05, 0x05, 0x07, 0x00}, //6 
-                                    {0x07, 0x05, 0x01, 0x01, 0x01, 0x01, 0x01, 0x00}, //7
-                                    {0x07, 0x05, 0x05, 0x02, 0x05, 0x05, 0x07, 0x00}, //8
-                                    {0x07, 0x05, 0x05, 0x07, 0x01, 0x05, 0x07, 0x00}}; //9
-*/
+//static unsigned char colTrack[] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+static __uint8_t bitMap = 0b00000000;
 
 //init for the i2c bus
 static int initI2cBus (char* bus, int address){
@@ -53,6 +41,30 @@ static int initI2cBus (char* bus, int address){
     exit(1);
 }
     return i2cFileDesc;
+}
+
+static void updateBitmap(bool newLine){
+    printf("before shift: %x\n", bitMap);
+    bitMap <<= 1;  
+    printf("after shift: %x\n", bitMap);
+    if (newLine == true){
+        bitMap |= 0x01; //the most right bit
+    }
+    else {
+        bitMap &= ~0x01;
+    }
+    printf("after condition shift: %x\n", bitMap);
+}
+
+static void updateBitArray(){
+    resultBits = 0x00;
+    for (int i = 0; i< 8; i++){
+        if (bitMap & (1 << i)){
+            resultBits |= dots[7-i];
+            printf("dots to OR: %x\n", dots[7-i]);
+        }
+    }
+    printf("result bit: %x\n", resultBits);
 }
 
 //taken from the tutorials
@@ -72,8 +84,6 @@ static void resetDisplay(){
     }
 }
 
-
-
 //init the i2c pins and turn on the display
 static void displayInternalInit(){
     runCommand("config-pin P9_18 i2c");
@@ -85,46 +95,29 @@ static void displayInternalInit(){
 }
 
 
-static void printCode(){
-    printLine();
-    printLine();
-}
 static void printLine(){
     int i2cFileDesc = initI2cBus(I2C_LINUX_BUS1, DISPLAY_I2C_ADDR);
-    for (int i = 0; i < 8; i++){
-        writeI2cReg(i2cFileDesc, ROW0, dots[i]);
-        writeI2cReg(i2cFileDesc, ROW1, dots[i]);
-        writeI2cReg(i2cFileDesc, ROW2, dots[i]);
-        writeI2cReg(i2cFileDesc, ROW3, dots[i]);
-        sleep_for_ms(500);
-    }
+        writeI2cReg(i2cFileDesc, ROW0, resultBits);
+        writeI2cReg(i2cFileDesc, ROW1, resultBits);
+        writeI2cReg(i2cFileDesc, ROW2, resultBits);
+        writeI2cReg(i2cFileDesc, ROW3, resultBits);
 }
 
-
-/*thread for the display*/
-static void *UpdateDisplay(void *_)
+void updateDisplay(bool newLine)
 {
-    while (!stopping){
-        //display init
-        // displayInit();
-
-        printCode();
-        sleep_for_ms(100);
-    }
-    return NULL;
+        updateBitmap(newLine);
+        updateBitArray();
+        printLine();
 }
 
 /*init thread*/
 void displayWriter_init(void)
 {
     displayInternalInit();
-    pthread_create(&displayThreadID, NULL, &UpdateDisplay, NULL);
 }
 
 /*clean up thread*/
 void displayWriter_cleanup(void)
 {
-    stopping = 1;
-    pthread_join(displayThreadID, NULL);
     resetDisplay();
 }
