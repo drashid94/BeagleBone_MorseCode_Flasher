@@ -7,4 +7,8 @@ void freePruMmapAddr(volatile void* pPruBase);
 
 void writeToDataArray(unsigned short code, int index);
 
+void memMap_set_data_ready_flag(void);
+
+void memMap_set_data_length(int len);
+
 #endif

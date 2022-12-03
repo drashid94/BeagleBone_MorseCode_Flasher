@@ -70,3 +70,31 @@ void writeToDataArray(unsigned short code, int index) {
     // Cleanup
     freePruMmapAddr(pPruBase);
 }
+
+void memMap_set_data_ready_flag()
+{
+    volatile void *pPruBase = getPruMmapAddr();
+    volatile sharedMemStruct_t *pSharedPru0 = PRU0_MEM_FROM_BASE(pPruBase);
+
+    printf("Setting morse data ready to true\n");
+    pSharedPru0->isMorseDataReady = true;
+
+    freePruMmapAddr(pPruBase);
+}
+
+void memMap_set_data_length(int len)
+{
+    volatile void *pPruBase = getPruMmapAddr();
+    volatile sharedMemStruct_t *pSharedPru0 = PRU0_MEM_FROM_BASE(pPruBase);
+
+    printf("setting data length to %d\n", len);
+    
+    pSharedPru0->morseCodeDataLength = len;
+
+    freePruMmapAddr(pPruBase);
+}
+
+void memMap_cleanup(void)
+{
+    freePruMmapAddr(getPruMmapAddr);
+}
