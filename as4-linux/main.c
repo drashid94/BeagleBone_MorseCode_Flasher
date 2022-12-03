@@ -93,8 +93,6 @@ int main (int argc, char *argv[]){
         while(!isSentenceCompleted()){
             while (!returnFlashingFlag() && !isSentenceCompleted()){
             //wait for the return flag
-            printf("stuck\n");
-            sleep_for_ms(10);
             }
             if(!isSentenceCompleted())
             {

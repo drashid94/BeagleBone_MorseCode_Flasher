@@ -89,7 +89,7 @@ void main(void)
             //Check if whitespace letter
             if(!morse_letter)
             {
-                flash_empty_dot_times(7);
+                flash_empty_dot_times(1);
             }
             while(morse_letter)
             {
