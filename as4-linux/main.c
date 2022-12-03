@@ -21,8 +21,6 @@ void pru_init(void)
 }
 
 int main (int argc, char *argv[]){
-    printf("testing driver\n");
-    printf("SIze of struct: %zu\n", sizeof(sharedMemStruct_t));
     displayWriter_init();
     pru_init();
     meminit();
@@ -31,7 +29,14 @@ int main (int argc, char *argv[]){
         char *buff = NULL;
         size_t sizeAllocated = 0;
         printf("Please write some text\n");
+        printf(">");
         size_t numCh = getline(&buff, &sizeAllocated, stdin);
+        
+        if(numCh == 1)
+        {
+            printf("Thanks for playing\nShutting down..\n");
+            break;
+        }
 
         for (int i = 0; i < numCh - 1; i++){
             unsigned short decode = MorseCode_getFlashCode(buff[i]);
@@ -50,6 +55,8 @@ int main (int argc, char *argv[]){
         while(!isSentenceCompleted()){
             while (!returnFlashingFlag() && !isSentenceCompleted()){
             //wait for the return flag
+            printf("stuck\n");
+            sleep_for_ms(10);
             }
             if(!isSentenceCompleted())
             {
@@ -62,5 +69,7 @@ int main (int argc, char *argv[]){
         free(buff);
         buff = NULL;
     }
+    displayWriter_cleanup();
+    memMap_cleanup();
 
 }

@@ -10,12 +10,13 @@ typedef struct {
     uint16_t morseCodeData[100];
     uint32_t morseCodeDataLength;
     bool isMorseDataReady;  
+    bool isDisplayUpdateCompleted;
     
     //PRU Written Data
     bool isLedOn;
     bool isButtonPressed;
     bool isFlashingCompleted;
     bool isFlagDataReady;
-    uint8_t padding1, padding2, padding3;
+    uint8_t padding1, padding2;
 } sharedMemStruct_t;
 #endif
