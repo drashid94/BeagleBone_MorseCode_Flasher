@@ -1,5 +1,6 @@
 #include <stdint.h>
 #include <stdbool.h>
+#include <string.h>
 #include <pru_cfg.h>
 #include "resource_table_empty.h"
 #include "../as4-linux/sharedDataStruct.h"
@@ -32,20 +33,44 @@ void delayInMs(int msDelay)
 
 static void flash_empty_dot_times(int n)
 {
+    for(int i = 0; i < n; i++)
+    {
+        __R30 &= ~(LED_MASK);
+        pSharedMemStruct->isLedOn = false;
+        pSharedMemStruct->isFlagDataReady = true;
+        delayInMs(300);
+    }
+}
 
+void signal_blink()
+{
+    __R30 |= (LED_MASK);
+    delayInMs(100);
+    __R30 &= ~(LED_MASK);
+    delayInMs(50);
+    __R30 |= (LED_MASK);
+    delayInMs(50);
+    __R30 &= ~(LED_MASK);
+    delayInMs(50);
+    __R30 |= (LED_MASK);
+    delayInMs(50);
+    __R30 &= ~(LED_MASK);
 }
 
 void main(void)
 {
     // Initialize:
-    pSharedMemStruct->isLedOn = false;
-    pSharedMemStruct->isButtonPressed = false;
+    memset((void*)THIS_PRU_DRAM_USABLE, 0, sizeof(sharedMemStruct_t));
 
-    bool isMorseDataReady = pSharedMemStruct->isMorseDataReady;
-    while(!isMorseDataReady)
+    signal_blink();
+
+    while(!pSharedMemStruct->isMorseDataReady)
     {
         //wait for data to be ready
     }
+
+    signal_blink();
+    signal_blink();
 
     //Clear flag
     pSharedMemStruct->isMorseDataReady = false;
@@ -54,7 +79,7 @@ void main(void)
     int morseDataLen = pSharedMemStruct->morseCodeDataLength;
     while(i < morseDataLen)
     {
-        uint16_t morse_letter = pSharedMemStruct->morseCodeData[i]; // One charactor in morse code
+        uint16_t morse_letter = pSharedMemStruct->morseCodeData[i]; // One letter in morse code
         //Check if whitespace letter
         if(!morse_letter)
         {
@@ -74,13 +99,17 @@ void main(void)
             }
             pSharedMemStruct->isFlagDataReady = true;
             delayInMs(300);
-            morse_letter <<= morse_letter;
+            morse_letter <<= 1;
             pSharedMemStruct->isButtonPressed = (__R31 & BUTTON_MASK) != 0;
         }
         //End of letter
         flash_empty_dot_times(3);
+
         i++;
     }
+    signal_blink();
+    signal_blink();
+    
     //When done with morse data
     pSharedMemStruct->isLedOn = false;
     pSharedMemStruct->isFlashingCompleted = true;
