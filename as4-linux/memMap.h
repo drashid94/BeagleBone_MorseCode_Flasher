@@ -12,7 +12,7 @@ void writeToDataArray(unsigned short code, int index);
 void memMap_set_data_ready_flag(void);
 
 void memMap_set_data_length(int len);
-void setLEDFlagOFF();
+void setLedDataReadyFlagOFF();
 bool returnFlashingFlag();
 bool returnLEDstatus();
 bool isSentenceCompleted();

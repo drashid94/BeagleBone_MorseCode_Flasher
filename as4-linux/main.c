@@ -22,37 +22,45 @@ void pru_init(void)
 
 int main (int argc, char *argv[]){
     printf("testing driver\n");
+    printf("SIze of struct: %zu\n", sizeof(sharedMemStruct_t));
     displayWriter_init();
-    meminit();
-    char *buff = NULL;
-    size_t sizeAllocated = 0;
-    size_t numCh = getline(&buff, &sizeAllocated, stdin);
-
     pru_init();
-    for (int i = 0; i < numCh - 1; i++){
-        unsigned short decode = MorseCode_getFlashCode(buff[i]);
-        //check code
-        printf("code: %2x\n", decode);
-        //write code to the array
-        writeToDataArray(decode, i);
-    }
+    meminit();
+    while(1)
+    {
+        char *buff = NULL;
+        size_t sizeAllocated = 0;
+        printf("Please write some text\n");
+        size_t numCh = getline(&buff, &sizeAllocated, stdin);
 
-    memMap_set_data_length(numCh - 1);
-    memMap_set_data_ready_flag();
+        for (int i = 0; i < numCh - 1; i++){
+            unsigned short decode = MorseCode_getFlashCode(buff[i]);
+            //check code
+            printf("code: %2x\n", decode);
+            //write code to the array
+            writeToDataArray(decode, i);
+        }
 
-    while (true){
+        memMap_set_data_length(numCh - 1);
+        memMap_set_data_ready_flag();
+
+        printf("Flags: %d, %d, %d\n", isSentenceCompleted(), returnFlashingFlag(), returnLEDstatus());
+
 
         while(!isSentenceCompleted()){
-            while (!returnFlashingFlag()){
+            while (!returnFlashingFlag() && !isSentenceCompleted()){
             //wait for the return flag
             }
-        setLEDFlagOFF();
-        updateDisplay(returnLEDstatus());
+            if(!isSentenceCompleted())
+            {
+                setLedDataReadyFlagOFF();
+                updateDisplay(returnLEDstatus());
+                printf("Updated display\n");
+            }
         }
+        displayWriter_cleanup();
+        free(buff);
+        buff = NULL;
     }
-
-    displayWriter_cleanup();
-    free(buff);
-    buff = NULL;
 
 }

@@ -44,16 +44,16 @@ static int initI2cBus (char* bus, int address){
 }
 
 static void updateBitmap(bool newLine){
-    printf("before shift: %x\n", bitMap);
+    // printf("before shift: %x\n", bitMap);
     bitMap <<= 1;  
-    printf("after shift: %x\n", bitMap);
+    // printf("after shift: %x\n", bitMap);
     if (newLine == true){
         bitMap |= 0x01; //the most right bit
     }
     else {
         bitMap &= ~0x01;
     }
-    printf("after condition shift: %x\n", bitMap);
+    // printf("after condition shift: %x\n", bitMap);
 }
 
 static void updateBitArray(){
@@ -61,10 +61,10 @@ static void updateBitArray(){
     for (int i = 0; i< 8; i++){
         if (bitMap & (1 << i)){
             resultBits |= dots[7-i];
-            printf("dots to OR: %x\n", dots[7-i]);
+            // printf("dots to OR: %x\n", dots[7-i]);
         }
     }
-    printf("result bit: %x\n", resultBits);
+    // printf("result bit: %x\n", resultBits);
 }
 
 //taken from the tutorials

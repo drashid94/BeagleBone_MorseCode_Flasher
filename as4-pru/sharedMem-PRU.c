@@ -59,60 +59,64 @@ void signal_blink()
 
 void main(void)
 {
-    // Initialize:
-    memset((void*)THIS_PRU_DRAM_USABLE, 0, sizeof(sharedMemStruct_t));
 
-    signal_blink();
-
-    while(!pSharedMemStruct->isMorseDataReady)
+    while(1)
     {
-        //wait for data to be ready
-    }
+        // Initialize:
+        memset((void*)pSharedMemStruct, 0, sizeof(sharedMemStruct_t));
 
-    signal_blink();
-    signal_blink();
+        signal_blink();
 
-    //Clear flag
-    pSharedMemStruct->isMorseDataReady = false;
-    //start flashing the led based on morse data
-    int i = 0;
-    int morseDataLen = pSharedMemStruct->morseCodeDataLength;
-    while(i < morseDataLen)
-    {
-        uint16_t morse_letter = pSharedMemStruct->morseCodeData[i]; // One letter in morse code
-        //Check if whitespace letter
-        if(!morse_letter)
+        while(!pSharedMemStruct->isMorseDataReady)
         {
-            flash_empty_dot_times(7);
+            //wait for data to be ready
         }
-        while(morse_letter)
-        {
-            if(morse_letter & 0x8000)
-            {
-                __R30 |= LED_MASK;
-                pSharedMemStruct->isLedOn = true;
-            }
-            else
-            {
-                __R30 &= ~LED_MASK;
-                pSharedMemStruct->isLedOn = false;
-            }
-            pSharedMemStruct->isFlagDataReady = true;
-            delayInMs(300);
-            morse_letter <<= 1;
-            pSharedMemStruct->isButtonPressed = (__R31 & BUTTON_MASK) != 0;
-        }
-        //End of letter
-        flash_empty_dot_times(3);
 
-        i++;
+        signal_blink();
+        signal_blink();
+
+        //Clear flag
+        pSharedMemStruct->isMorseDataReady = false;
+        //start flashing the led based on morse data
+        int i = 0;
+        int morseDataLen = pSharedMemStruct->morseCodeDataLength;
+        while(i < morseDataLen)
+        {
+            uint16_t morse_letter = pSharedMemStruct->morseCodeData[i]; // One letter in morse code
+            //Check if whitespace letter
+            if(!morse_letter)
+            {
+                flash_empty_dot_times(7);
+            }
+            while(morse_letter)
+            {
+                if(morse_letter & 0x8000)
+                {
+                    __R30 |= LED_MASK;
+                    pSharedMemStruct->isLedOn = true;
+                }
+                else
+                {
+                    __R30 &= ~LED_MASK;
+                    pSharedMemStruct->isLedOn = false;
+                }
+                pSharedMemStruct->isFlagDataReady = true;
+                delayInMs(300);
+                morse_letter <<= 1;
+                pSharedMemStruct->isButtonPressed = (__R31 & BUTTON_MASK) != 0;
+            }
+            //End of letter
+            flash_empty_dot_times(3);
+
+            i++;
+        }
+        signal_blink();
+        signal_blink();
+
+        //When done with morse data
+        pSharedMemStruct->isLedOn = false;
+        pSharedMemStruct->isFlashingCompleted = true;
     }
-    signal_blink();
-    signal_blink();
-    
-    //When done with morse data
-    pSharedMemStruct->isLedOn = false;
-    pSharedMemStruct->isFlashingCompleted = true;
  }
 
  //Linux::

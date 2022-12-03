@@ -88,11 +88,11 @@ bool returnLEDstatus(){
     return pSharedPru0->isLedOn;
 }
 
-void setLEDFlagOFF(){
-    pSharedPru0 -> isLedOn = false;
+void setLedDataReadyFlagOFF(){
+    pSharedPru0->isFlagDataReady = false;
 }
 
 bool isSentenceCompleted(){
     //done with the sentence 
-    return pSharedPru0 -> isFlashingCompleted;
+    return pSharedPru0->isFlashingCompleted;
 }
